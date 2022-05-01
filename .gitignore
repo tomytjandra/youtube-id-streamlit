@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Credentials
+secrets.toml
+kaggle.json
+.env
+
+# Large files
+*.csv
+
+# Draft
+draft.ipynb
+
+# Temporary folder
+heroku
