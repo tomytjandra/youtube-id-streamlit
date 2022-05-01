@@ -22,10 +22,10 @@ st.set_page_config(
 
 # ---------- READ CSV
 
-columns = [
-    'publish_time', 'trending_time',
-    'title', 'channel_name', 'category_id',
-    'view', 'like', 'dislike', 'comment']
+# columns = [
+#     'publish_time', 'trending_time',
+#     'title', 'channel_name', 'category_id',
+#     'view', 'like', 'dislike', 'comment']
 
 # youtube = pd.read_csv(
 #     'data_input/trending.csv',
@@ -81,16 +81,16 @@ selected_category = st.sidebar.selectbox(
     label='Video Category',
     options=['All Categories'] + youtube_unique['category_id'].dropna().sort_values().unique().tolist())
 
-# button
-update_data = st.sidebar.button(
-    label='Update Dataset',
-    help=f"Download latest dataset from [Kaggle]({st.secrets['KAGGLE_DATASET']})"
-)
-if update_data:
-    with st.spinner('Downloading dataset...'):
-        from download import main
-        main()
-    st.experimental_rerun()
+# # button
+# update_data = st.sidebar.button(
+#     label='Update Dataset',
+#     help=f"Download latest dataset from [Kaggle]({st.secrets['KAGGLE_DATASET']})"
+# )
+# if update_data:
+#     with st.spinner('Downloading dataset...'):
+#         from download import main
+#         main()
+#     st.experimental_rerun()
 
 # ---------- FILTER DATA BASED ON USER INPUT
 
