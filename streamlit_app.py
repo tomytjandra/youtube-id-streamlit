@@ -6,8 +6,8 @@ import json
 
 # data visualization
 import plotly.express as px
-import plotly.io as pio
-pio.templates.default = 'plotly_dark'
+px.defaults.template = "plotly_dark"
+px.defaults.color_continuous_scale = "reds"
 
 # dashboarding
 from PIL import Image
@@ -60,16 +60,17 @@ youtube_unique.dropna(subset='view', inplace=True)
 # feature engineering
 youtube_unique['publish_day'] = youtube_unique['publish_time'].dt.day_name()
 youtube_unique['publish_hour'] = youtube_unique['publish_time'].dt.hour
+youtube_unique['trending_date'] = youtube_unique['trending_time'].dt.date
 
-# ---------- SIDEBAR
+# ---------- DASHBOARD SIDEBAR
 
 # image
 image = Image.open('assets/youtube.png')
 st.sidebar.image(image)
 
 # date input
-min_date = youtube_unique['trending_time'].min()
-max_date = youtube_unique['trending_time'].max()
+min_date = youtube_unique['trending_date'].min()
+max_date = youtube_unique['trending_date'].max()
 selected_start_date, selected_end_date = st.sidebar.date_input(
     label='Trending Date Range',
     min_value=min_date,
@@ -79,7 +80,7 @@ selected_start_date, selected_end_date = st.sidebar.date_input(
 # select box
 selected_category = st.sidebar.selectbox(
     label='Video Category',
-    options=['All Categories'] + youtube_unique['category_id'].dropna().sort_values().unique().tolist())
+    options=['All Categories'] + youtube_unique['category_id'].sort_values().unique().tolist())
 
 # # button
 # update_data = st.sidebar.button(
@@ -95,7 +96,6 @@ selected_category = st.sidebar.selectbox(
 # ---------- FILTER DATA BASED ON USER INPUT
 
 # filter date
-youtube_unique['trending_date'] = youtube_unique['trending_time'].dt.date
 youtube_unique = youtube_unique[
     (youtube_unique['trending_date'] >= selected_start_date) &
     (youtube_unique['trending_date'] <= selected_end_date)]
@@ -104,7 +104,7 @@ youtube_unique = youtube_unique[
 if selected_category != 'All Categories':
     youtube_unique = youtube_unique[youtube_unique['category_id'] == selected_category]
 
-# ---------- MAIN PAGE
+# ---------- DASHBOARD BODY
 
 # title
 st.title("Indonesia's YouTube Trending Statistics")
@@ -124,40 +124,39 @@ fig = px.bar(
     orientation='h',
     title=f'Top 10 Trending Channels in {selected_category}',
     labels=dict(index='', value='Video Count'),
-    color=data,
-    color_continuous_scale='reds')
+    color=data)
 fig.update_layout(coloraxis_showscale=False, xaxis_separatethousands=True)
-# fig.update_traces(hovertemplate='<b>%{y}</b><br>%{x} Videos', name='')
+fig.update_traces(hovertemplate='<b>%{y}</b><br>%{x} Videos', name='')
 st.plotly_chart(fig)
 
 # heatmap
 st.header(':date: Publish Time')
-cats = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 fig = px.density_heatmap(
     youtube_unique,
     x='publish_hour',
     y='publish_day',
     title=f'Count of Trending Videos in {selected_category}',
-    labels=dict(publish_hour='Publish Hour', publish_day='Publish Day'),
-    color_continuous_scale='reds')
-fig.update_yaxes(categoryarray=cats, autorange='reversed')
-# fig.update_traces(hovertemplate='<b>%{y} (Hour: %{x})</b><br>%{z} Videos')
+    labels=dict(publish_hour='Publish Hour', publish_day='Publish Day'))
+fig.update_yaxes(
+    categoryarray=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    autorange='reversed')
+fig.update_traces(hovertemplate='<b>%{y} (Hour: %{x})</b><br>%{z} Videos')
 st.plotly_chart(fig)
 
-# scatter plot
-st.header(':bulb: Engagement')
-metric_choices = ['like', 'dislike', 'comment']
-col1, col2 = st.columns(2)
-var_x = col1.selectbox(label='Horizontal Axis',
-                       options=metric_choices, index=0)
-var_y = col2.selectbox(label='Vertical Axis', options=metric_choices, index=1)
+# # scatter plot
+# st.header(':bulb: Engagement')
+# metric_choices = ['like', 'dislike', 'favorite', 'comment']
+# col1, col2 = st.columns(2)
+# var_x = col1.selectbox(label='Horizontal Axis',
+#                        options=metric_choices, index=0)
+# var_y = col2.selectbox(label='Vertical Axis', options=metric_choices, index=1)
 
-fig = px.scatter(
-    youtube_unique,
-    x=var_x,
-    y=var_y,
-    size='view',
-    title=f'{var_x.title()} vs {var_y.title()} in {selected_category}',
-    hover_name='channel_name',
-    hover_data=['title'])
-st.plotly_chart(fig)
+# fig = px.scatter(
+#     youtube_unique,
+#     x=var_x,
+#     y=var_y,
+#     size='view',
+#     title=f'{var_x.title()} vs {var_y.title()} in {selected_category}',
+#     hover_name='channel_name',
+#     hover_data=['title'])
+# st.plotly_chart(fig)
